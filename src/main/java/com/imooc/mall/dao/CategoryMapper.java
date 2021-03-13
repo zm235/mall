@@ -10,4 +10,6 @@ public interface CategoryMapper {
     @Select("Select * from mall_category where id = #{id}")
     Category findById(@Param("id") Integer id);
 
+    Category queryById(Integer id);
+
 }
