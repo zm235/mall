@@ -14,6 +14,7 @@
     <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
   </resultMap>
   <sql id="Base_Column_List">
+
     id, username, password, email, phone, question, answer, role, create_time, update_time
   </sql>
   <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
@@ -149,4 +150,19 @@
       update_time = #{updateTime,jdbcType=TIMESTAMP}
     where id = #{id,jdbcType=INTEGER}
   </update>
+
+  <select id="countByUsername" parameterType="java.lang.String" resultType="java.lang.Integer">
+    select
+    count(1)
+    from mall_user
+    where username = #{username,jdbcType=VARCHAR}
+  </select>
+
+  <select id="countByEmail" parameterType="java.lang.String" resultType="java.lang.Integer">
+    select
+    count(1)
+    from mall_user
+    where email = #{email,jdbcType=VARCHAR}
+  </select>
+
 </mapper>

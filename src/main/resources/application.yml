@@ -7,6 +7,8 @@ spring:
 mybatis:
   configuration:
     map-underscore-to-camel-case: true
+#    console log config (Maybe in the future, need to output the log into the file)
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
   mapper-locations: classpath:mappers/*.xml
 logging:
     pattern:

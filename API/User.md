@@ -59,7 +59,7 @@ success
 ````
 {
     "status":0,
-    "msg":"success (username available)",
+    "msg":"Register success",
 }
 ````
 
@@ -67,7 +67,7 @@ fail
 ````
 {
     "status":2,
-    "msg":"fail (username has been taken)",
+    "msg":"Register failure",
 }
 ````
 
@@ -101,7 +101,7 @@ fail
 ````
 {
     "status":10,
-    "msg":"User hasn't been logged in, can't retrieve the user data",
+    "msg":"User has not been logged in, cannot retrieve the user data",
 }   
 ````
 
