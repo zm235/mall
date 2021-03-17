@@ -23,9 +23,7 @@ public class UserServiceImpl implements IUserService {
      * @param user
      */
     @Override
-    public ResponseVo register(User user) {
-//        error();
-
+    public ResponseVo<User> register(User user) {
         // username availability
         int countByUsername = userMapper.countByUsername(user.getUsername());
         if (countByUsername > 0) {
@@ -52,8 +50,28 @@ public class UserServiceImpl implements IUserService {
         return ResponseVo.success();
     }
 
-    private void error() {
-        throw new RuntimeException();
+    /**
+     * login
+     *
+     * @param username
+     * @param password
+     */
+    @Override
+    public ResponseVo<User> login(String username, String password) {
+        User user = userMapper.selectByUsername(username);
+        if (user == null) {
+            // User not exists
+            return ResponseVo.error(ResponseEnum.USERNAME_OR_PASSWORD_ERROR);
+        }
+        if (!user.getPassword().equalsIgnoreCase(DigestUtils.md5DigestAsHex(password.getBytes(StandardCharsets.UTF_8)))){
+            // password wrong
+            return ResponseVo.error(ResponseEnum.USERNAME_OR_PASSWORD_ERROR);
+        }
+
+        user.setPassword("");
+
+        return ResponseVo.success(user);
     }
+
 
 }

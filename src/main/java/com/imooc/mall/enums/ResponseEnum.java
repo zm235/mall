@@ -18,6 +18,8 @@ public enum ResponseEnum {
 
     NEED_LOGIN(10, "User has not been logged in, cannot retrieve the user data"),
 
+    USERNAME_OR_PASSWORD_ERROR(11, "Username or Password error"),
+
     ;
 
     Integer code;
