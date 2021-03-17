@@ -1,6 +1,5 @@
 package com.imooc.mall.controller;
 
-import com.imooc.mall.enums.ResponseEnum;
 import com.imooc.mall.form.UserLoginForm;
 import com.imooc.mall.form.UserRegisterForm;
 import com.imooc.mall.pojo.User;
@@ -58,19 +57,31 @@ public class UserController {
 
         // Session setting
         httpSession.setAttribute(CURRENT_USER, userResponseVo.getData());
+        log.info("/login sessionId={}", httpSession.getId());
 
         return userResponseVo;
 
     }
 
+    // Save session in the memory (easy to lose: like restart the server or kill the process)
+    // TODO: Improvement: save the session into the redis (token(sessionID) + redis)
     @GetMapping("/user")
     public ResponseVo<User> userInfo(HttpSession httpSession) {
+        log.info("/user sessionId={}", httpSession.getId());
         User user = (User) httpSession.getAttribute(CURRENT_USER);
-        if (user == null) {
-            // Haven't been logged in
-            return ResponseVo.error(ResponseEnum.NEED_LOGIN);
-        }
         return ResponseVo.success(user);
+    }
+
+
+    // TODO: Check whether login or not ---> intercept
+    @PostMapping("/user/logout")
+    /**
+     * {@link org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory}
+     */
+    public ResponseVo<User> logout(HttpSession httpSession) {
+        log.info("/user/logout sessionId={}", httpSession.getId());
+        httpSession.removeAttribute(CURRENT_USER);
+        return ResponseVo.success();
     }
 
 
