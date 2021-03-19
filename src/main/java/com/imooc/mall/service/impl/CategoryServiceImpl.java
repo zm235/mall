@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.imooc.mall.consts.MallConst.ROOT_PARENT_ID;
@@ -47,6 +48,21 @@ public class CategoryServiceImpl implements ICategoryService {
 
         return ResponseVo.success(categoryVoList);
 
+    }
+
+    @Override
+    public void findSubCategoryId(Integer id, Set<Integer> resultMap) {
+        List<Category> categories = categoryMapper.selectAll();
+        findSubCategoryId(categories, id, resultMap);
+    }
+
+    private void findSubCategoryId(List<Category> categories, Integer id, Set<Integer> resultMap) {
+        for (Category category : categories) {
+            if (category.getParentId().equals(id)) {
+                resultMap.add(category.getId());
+                findSubCategoryId(categories, category.getId(), resultMap);
+            }
+        }
     }
 
     private void findSubCategory(List<CategoryVo> categoryVoList, List<Category> categories) {
