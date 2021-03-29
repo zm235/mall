@@ -20,6 +20,8 @@ public enum ResponseEnum {
 
     USERNAME_OR_PASSWORD_ERROR(11, "Username or Password error"),
 
+    PRODUCT_OFF_SALE_OR_DELETE(12, "Product is off sale or deleted"),
+
     ;
 
     Integer code;
