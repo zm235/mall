@@ -1,5 +1,8 @@
 package com.imooc.mall.enums;
 
+import lombok.Getter;
+
+@Getter
 public enum ProductStatusEnum {
     ON_SALE(1),
 

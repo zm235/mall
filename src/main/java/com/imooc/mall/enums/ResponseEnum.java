@@ -22,6 +22,9 @@ public enum ResponseEnum {
 
     PRODUCT_OFF_SALE_OR_DELETE(12, "Product is off sale or deleted"),
 
+    PRODUCT_NOT_EXIST(13, "Product doesn't exist"),
+
+    PRODUCT_STOCK_ERROR(14, "Inventory is not enough"),
     ;
 
     Integer code;
