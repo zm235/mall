@@ -25,6 +25,8 @@ public enum ResponseEnum {
     PRODUCT_NOT_EXIST(13, "Product doesn't exist"),
 
     PRODUCT_STOCK_ERROR(14, "Inventory is not enough"),
+
+    CART_PRODUCT_NOT_EXIST(15, "The product is not in the Cart"),
     ;
 
     Integer code;

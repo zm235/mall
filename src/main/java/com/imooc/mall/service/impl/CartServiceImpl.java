@@ -5,6 +5,7 @@ import com.imooc.mall.dao.ProductMapper;
 import com.imooc.mall.enums.ProductStatusEnum;
 import com.imooc.mall.enums.ResponseEnum;
 import com.imooc.mall.form.CartAddForm;
+import com.imooc.mall.form.CartUpdateForm;
 import com.imooc.mall.pojo.Cart;
 import com.imooc.mall.pojo.Product;
 import com.imooc.mall.service.ICartService;
@@ -138,5 +139,46 @@ public class CartServiceImpl implements ICartService {
         cartVo.setCartTotalQuantity(cartTotalQuantity);
         cartVo.setCartProductVoList(cartProductVoList);
         return ResponseVo.success(cartVo);
+    }
+
+    @Override
+    public ResponseVo<CartVo> update(Integer uid, Integer productId, CartUpdateForm cartUpdateForm) {
+        HashOperations<String, String, Object> opsForHash = redisTemplate.opsForHash();
+        String redisKey = String.format(CART_REDIS_KEY_TEMPLATE, uid);
+
+        String value = (String) opsForHash.get(redisKey, String.valueOf(productId));
+        if (StringUtils.isEmpty(value)) {
+            // the product doesn't exist -> return error
+            return ResponseVo.error(ResponseEnum.CART_PRODUCT_NOT_EXIST);
+        }
+        // already exist -> modify the quantity
+        Cart cart = gson.fromJson(value, Cart.class);
+        if (cartUpdateForm.getQuantity() != null
+        && cartUpdateForm.getQuantity() >= 0) {
+            cart.setQuantity(cartUpdateForm.getQuantity());
+        }
+        if (cartUpdateForm.getSelected() != null) {
+            cart.setProductSelected(cartUpdateForm.getSelected());
+        }
+
+        opsForHash.put(redisKey, String.valueOf(productId), gson.toJson(cart));
+
+        return list(uid);
+    }
+
+    @Override
+    public ResponseVo<CartVo> delete(Integer uid, Integer productId) {
+        HashOperations<String, String, Object> opsForHash = redisTemplate.opsForHash();
+        String redisKey = String.format(CART_REDIS_KEY_TEMPLATE, uid);
+
+        String value = (String) opsForHash.get(redisKey, String.valueOf(productId));
+        if (StringUtils.isEmpty(value)) {
+            // the product doesn't exist -> return error
+            return ResponseVo.error(ResponseEnum.CART_PRODUCT_NOT_EXIST);
+        }
+        // already exist -> delete
+        opsForHash.delete(redisKey, String.valueOf(productId));
+
+        return list(uid);
     }
 }
