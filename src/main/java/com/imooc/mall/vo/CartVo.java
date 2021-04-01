@@ -9,7 +9,7 @@ import java.util.List;
 @Data
 public class CartVo {
 
-    private List<CartProductVoList> cartProductVoListList;
+    private List<CartProductVo> cartProductVoList;
 
     private boolean selectAll;
 

@@ -9,4 +9,6 @@ public interface ICartService {
 
     ResponseVo<CartVo> add(Integer uid, CartAddForm cartAddForm);
 
+    ResponseVo<CartVo> list(Integer uid);
+
 }

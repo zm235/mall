@@ -8,6 +8,7 @@ import com.imooc.mall.form.CartAddForm;
 import com.imooc.mall.pojo.Cart;
 import com.imooc.mall.pojo.Product;
 import com.imooc.mall.service.ICartService;
+import com.imooc.mall.vo.CartProductVo;
 import com.imooc.mall.vo.CartVo;
 import com.imooc.mall.vo.ResponseVo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,11 @@ import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+
+import java.math.BigDecimal;
+import java.util.*;
+import java.util.stream.Collectors;
+
 
 @Service
 public class CartServiceImpl implements ICartService {
@@ -55,7 +61,7 @@ public class CartServiceImpl implements ICartService {
         String redisKey = String.format(CART_REDIS_KEY_TEMPLATE, uid);
 
         Cart cart;
-        String value = String.valueOf(opsForHash.get(redisKey, String.valueOf(product.getId())));
+        String value = (String) opsForHash.get(redisKey, String.valueOf(product.getId()));
         if (StringUtils.isEmpty(value)) {
             // the product doesn't exist -> just new one
             cart = new Cart(product.getId(), quantity, cartAddForm.getSelected());
@@ -69,6 +75,68 @@ public class CartServiceImpl implements ICartService {
                 String.valueOf(product.getId()),
                 gson.toJson(cart));
 
-        return null;
+        return list(uid);
+    }
+
+    @Override
+    public ResponseVo<CartVo> list(Integer uid) {
+        HashOperations<String, String, Object> opsForHash = redisTemplate.opsForHash();
+        String redisKey = String.format(CART_REDIS_KEY_TEMPLATE, uid);
+
+        Map<String, Object> entries = opsForHash.entries(redisKey);
+
+        boolean selectAll = true;
+        Integer cartTotalQuantity = 0;
+        BigDecimal cartTotalPrice = BigDecimal.ZERO;
+        CartVo cartVo = new CartVo();
+        List<CartProductVo> cartProductVoList = new ArrayList<>();
+
+        Set<Integer> productIdSet = entries.keySet().stream().map(d -> Integer.valueOf(d)).collect(Collectors.toSet());
+        List<Product> productList = productMapper.selectByProductIdSet(productIdSet);
+
+        // Construct a hashmap for easy access to specific product based on different productId
+        Map<Integer, Product> map = new HashMap<>();
+        for (Product product : productList) {
+            map.put(product.getId(), product);
+        }
+
+        for (Map.Entry<String, Object> entry : entries.entrySet()) {
+            Integer productId = Integer.valueOf(entry.getKey());
+            Cart cart = gson.fromJson(String.valueOf(entry.getValue()), Cart.class);
+
+            Product product = map.get(productId);
+
+            if (product != null) {
+                // Construct CartProductVO
+                CartProductVo cartProductVo = new CartProductVo(productId,
+                        cart.getQuantity(),
+                        product.getName(),
+                        product.getSubtitle(),
+                        product.getMainImage(),
+                        product.getPrice(),
+                        product.getStatus(),
+                        product.getPrice().multiply(BigDecimal.valueOf(cart.getQuantity())),
+                        product.getStock(),
+                        cart.getProductSelected());
+                cartProductVoList.add(cartProductVo);
+
+                if (!cart.getProductSelected()) {
+                    selectAll = false;
+                } else {
+                    // Calculate the total price (just selected product)
+                    cartTotalPrice = cartTotalPrice.add(cartProductVo.getProductTotalPrice());
+                }
+
+
+            }
+
+            cartTotalQuantity += cart.getQuantity();
+        }
+
+        cartVo.setSelectAll(selectAll);
+        cartVo.setCartTotalPrice(cartTotalPrice);
+        cartVo.setCartTotalQuantity(cartTotalQuantity);
+        cartVo.setCartProductVoList(cartProductVoList);
+        return ResponseVo.success(cartVo);
     }
 }
