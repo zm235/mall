@@ -191,9 +191,11 @@
     <include refid="Base_Column_List" />
     from mall_product
     where
-      id in
+    <if test="productIdSet.size() > 0">
+    id in
       <foreach collection="productIdSet" item="item" index="index" open="(" separator="," close=")">
         #{item}
       </foreach>
+    </if>
   </select>
 </mapper>

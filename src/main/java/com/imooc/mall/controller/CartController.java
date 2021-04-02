@@ -17,4 +17,12 @@ public class CartController {
         return null;
     }
 
+    public ResponseVo<CartVo> list() {
+    return null;
+    }
+
+    public ResponseVo<CartVo> update() {
+return null;
+    }
+
 }
